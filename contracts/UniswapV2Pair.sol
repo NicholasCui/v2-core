@@ -42,6 +42,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
     }
 
     function _safeTransfer(address token, address to, uint value) private {
+        // TODO: what is the meaning of these codes?
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
     }
@@ -59,6 +60,8 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
     event Sync(uint112 reserve0, uint112 reserve1);
 
     constructor() public {
+        // the factory contract will create the pair contract,
+        // so msg.sender is the factory contract
         factory = msg.sender;
     }
 
@@ -71,11 +74,14 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20 {
 
     // update reserves and, on the first call per block, price accumulators
     function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {
+        // TODO: how to check overflow?
         require(balance0 <= uint112(-1) && balance1 <= uint112(-1), 'UniswapV2: OVERFLOW');
+        // TODO: what is the length of block.timestamp?
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
         if (timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
             // * never overflows, and + overflow is desired
+            // TODO: how to calculate the values?
             price0CumulativeLast += uint(UQ112x112.encode(_reserve1).uqdiv(_reserve0)) * timeElapsed;
             price1CumulativeLast += uint(UQ112x112.encode(_reserve0).uqdiv(_reserve1)) * timeElapsed;
         }
